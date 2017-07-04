@@ -1,0 +1,16 @@
+pyggybank has the ability to:
+
+ * Log-in to consolidate internet banking to a single place
+    * store credentials in a secure manner
+ * Handle multiple currencies and format localisation
+ * Cache results to speed up subsequent retrievals (TODO)
+ * Output the results into standard formats for subsequent analysis (TODO)
+
+
+pyggybank does not strive to:
+
+ * Provide a rich internet banking-like web-interface
+ * Interpret the data (e.g. forecasts)
+ * Set up transfers, payments, direct debits or any other non read-only activity
+ * Access transatction - it gets account balances only
+ * Support legacy python. Python 3.5+
