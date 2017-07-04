@@ -1,2 +1,2 @@
-splinter
+splinter==0.7.5
 babel
