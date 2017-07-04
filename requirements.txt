@@ -1,2 +1,2 @@
 splinter==0.7.5
-babel
+babel==2.4.0
