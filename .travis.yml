@@ -3,12 +3,15 @@ language: python
 addons:  
   firefox: latest-esr
 
+matrix:
+    fast_finish: true
+
 python:
   - "3.6"
 
 install:
   - pip install -e .
-  - pip install pytest
+  - pip install -r testing/requirements.txt
 
 before_install:
   # https://docs.travis-ci.com/user/gui-and-headless-browsers/#Using-xvfb-to-Run-Tests-That-Require-a-GUI
@@ -23,5 +26,8 @@ before_install:
 
 script:
   - python -c "import splinter; print(splinter);"
-  - python splinter_test.py
-  - pytest pyggybank
+    #- #python splinter_test.py
+    #- pytest pyggybank
+  - which gnupg
+  - pip install pexpect
+  - python testing/test_wizard.py

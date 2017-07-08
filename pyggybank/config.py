@@ -1,5 +1,5 @@
 from pathlib import Path
-import yaml
+import ruamel.yaml as yaml
 
 
 CONFIG_DIR = Path.home() / '.config' / 'pyggybank'
@@ -14,6 +14,6 @@ DEFAULT_ACCOUNTS_FILE = CONFIG_DIR / 'accounts.encrypted.yml'
 
 if CONFIG_FILE.exists():
     with CONFIG_FILE.open('r') as fh:
-        CONFIG = yaml.load(fh)
+        CONFIG = yaml.safe_load(fh)
 else:
     CONFIG = {}

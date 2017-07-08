@@ -17,12 +17,16 @@ setup(
     url='https://github.com/pelson/pyggybank',
     license='BSD',
     packages=[
-        'pyggybank', 'pyggybank.gpgconfig'
+        'pyggybank', 'pyggybank.providers', 'pyggybank.gpgconfig'
     ],
     install_requires=['prompt_toolkit',
                       'splinter',
-                      'pyyaml',
-                      'babel'],
+                      'ruamel.yaml',
+                      'babel',
+                      # The original python-gnupg, not to be confused with "gnupg"
+                      # which installs to the same name.
+                      'python-gnupg'],
+    python_requires='>=3.6',
 	entry_points={
           'console_scripts': [
               'pyggybank = pyggybank.cli:main'

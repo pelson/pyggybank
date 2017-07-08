@@ -2,6 +2,9 @@
 
 badges
 
+PLEASE NOTE: Currently it is necessary to have a recent version of gnupg (>=2.1) to be able to encrypt and decrypt accounts configs.
+At some point, I will add an option to disable encryption for those on older gnupg versions.
+
 ## Security
 
 

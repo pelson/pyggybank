@@ -41,7 +41,7 @@ def assert_gpg_keys(gpg, private=False):
         gpg_home = cfg.CONFIG.get('gpg-home', None)
         if gpg_home:
             extra_args.extend(['--homedir', gpg_home])
-        p = subprocess.Popen([gpg.gpgbinary, '--generate-key'] + extra_args)
+        p = subprocess.Popen([gpg.gpgbinary, '--gen-key'] + extra_args)
         p.wait()
 
 
@@ -55,6 +55,9 @@ from prompt_toolkit.completion import Completer, Completion
 
 def select_gpg_id():
     gpg = gpg_init()
+
+    assert_gpg_keys(gpg, private=True)
+
     ids = []
     for key in gpg.list_keys(True):
         ids.extend(key['uids'])

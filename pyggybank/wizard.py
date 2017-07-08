@@ -15,7 +15,7 @@ from prompt_toolkit.auto_suggest import AutoSuggestFromHistory, AutoSuggest, Sug
 from prompt_toolkit.validation import Validator, ValidationError
 from prompt_toolkit import prompt
 
-import yaml
+import ruamel.yaml as yaml
 from . import core
 from . import config
 
