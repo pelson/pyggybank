@@ -1,6 +1,6 @@
 pyggybank has the ability to:
 
- * Log-in to consolidate internet banking to a single place
+ * Login to internet banking in a semi-automated way
     * store credentials in a secure manner
  * Handle multiple currencies and format localisation
  * Cache results to speed up subsequent retrievals (TODO)
@@ -13,4 +13,5 @@ pyggybank does not strive to:
  * Interpret the data (e.g. forecasts)
  * Set up transfers, payments, direct debits or any other non read-only activity
  * Access transatction - it gets account balances only
- * Support legacy python. Python 3.5+
+ * Support legacy python. Python 3.6+
+ * Automate sections where human-in-the-loop is required (e.g. robot detection, bespoke one-time pass code implementations)

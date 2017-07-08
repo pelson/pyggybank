@@ -1,4 +1,11 @@
 from distutils.core import setup
+from distutils.version import StrictVersion
+import sys
+
+
+py_ver = StrictVersion('{v.major}.{v.minor}'.format(v=sys.version_info))
+if py_ver < StrictVersion('3.6'):
+    sys.exit('Sorry, Python < 3.6 is not supported.')
 
 
 setup(
@@ -10,8 +17,17 @@ setup(
     url='https://github.com/pelson/pyggybank',
     license='BSD',
     packages=[
-        'pyggybank',
+        'pyggybank', 'pyggybank.gpgconfig'
     ],
+    install_requires=['prompt_toolkit',
+                      'splinter',
+                      'pyyaml',
+                      'babel'],
+	entry_points={
+          'console_scripts': [
+              'pyggybank = pyggybank.cli:main'
+          ]
+    },
     classifiers=[
         'Development Status :: 4 - Beta',
         'Intended Audience :: Developers',
