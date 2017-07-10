@@ -1,4 +1,4 @@
 splinter==0.7.5
 babel==2.4.0
-pyyaml
+pyyaml==3.12
 prompt_toolkit
