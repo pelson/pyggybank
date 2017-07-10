@@ -1,2 +1,2 @@
-pexpect
+pexpect==4.2.1
 pytest
