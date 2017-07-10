@@ -3,7 +3,7 @@ import sys
 
 from . import pygs
 from . import config
-
+from . import core
 
 # An extension of argparse as defined by https://stackoverflow.com/a/26379693/741316
 def set_default_subparser(self, name, args=None):
@@ -54,7 +54,6 @@ def accounts_cat(accounts_file):
 def main():
     parser = argparse.ArgumentParser(description='Get information from your internet banks')
 
-    
     top_subparser = parser.add_subparsers()
     sp = top_subparser.add_parser('balance')
     sp.set_defaults(func=balance)
@@ -101,8 +100,23 @@ def main():
 
 
 def balance(accounts_files):
-    print('balance called')
-    print(accounts_files)
+    # Q: Do we really need to support multiple configs at the same time?
+    from . import gpgconfig
+    from pathlib import Path
+    import splinter
+    browser = splinter.Browser()
+    for accounts_file in accounts_files:
+        accounts_file = Path(accounts_file)
+        if not accounts_file.exists():
+            raise ValueError("The accounts file doesn't exist. Perhaps you "
+                             "want to run the wizard?")
+        config = gpgconfig.decrypt_config(accounts_file)
+        for account in config.get('accounts', []):
+            provider = core.Provider.from_config(account)
+            credentials = provider.prepare_credentials(account)
+            provider.authenticate(browser, credentials)
+
+        print(config)
 
 
 def wizard(*args, **kwargs):

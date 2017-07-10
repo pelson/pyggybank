@@ -3,6 +3,6 @@ from .. import core
 
 class TestProvider(core.Provider):
     names = ['Test provider']
-    attributes = ['User ID (make it up)', 'password']
+    attributes = [core.attr('User ID (make it up)', alias='uid'),
+                  'password']
     domain = 'https://github.com/pelson/pyggybank/'
-   

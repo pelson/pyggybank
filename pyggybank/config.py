@@ -9,7 +9,7 @@ CONFIG_FILE = CONFIG_DIR / 'config.yml'
 DEFAULT_ACCOUNTS_FILE = CONFIG_DIR / 'accounts.encrypted.yml'
 
 
-# NOTE: We are depending on ordered configs as a result of 
+# NOTE: We are depending on ordered configs as a result of
 # https://docs.python.org/3.6/whatsnew/3.6.html#new-dict-implementation.
 
 if CONFIG_FILE.exists():
