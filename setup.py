@@ -26,6 +26,7 @@ setup(
                       # The original python-gnupg, not to be confused with "gnupg"
                       # which installs to the same name.
                       'python-gnupg'],
+    tests_require=['pytest'],
     python_requires='>=3.6',
 	entry_points={
           'console_scripts': [

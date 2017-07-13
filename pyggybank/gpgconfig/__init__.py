@@ -94,7 +94,7 @@ def write_encrypted_config(path, config):
         fh.write(bytes(str(encrypted), 'utf-8'))
 
 
-def decrypt_config(path):
+def decrypt_file(path, decryption_context="the config"):
     with open(path, 'rb') as fh:
         encrypted = fh.read()
 
@@ -117,10 +117,16 @@ def decrypt_config(path):
 
     if not decrypted.ok:
         log.warn(pprint(decrypted.__dict__))
-        raise RuntimeError('Unable to decrypt the config. Are you able to decrypt '
-                           'with "{} --decrypt {}"?'.format(gpg.gpgbinary, path))
+        raise RuntimeError(
+            'Unable to decrypt {}. Are you able to decrypt with '
+            '"{} --decrypt {}"?'.format(decryption_context,
+                                        gpg.gpgbinary, path))
+    return decrypted
 
-    config = yaml.load(str(decrypted), Loader=yaml.Loader)
+
+def decrypt_config(path):
+    decrypted = decrypt_file(path)
+    config = yaml.safe_load(str(decrypted))
     return config
 
 

@@ -44,3 +44,5 @@ https://www.coshx.com/blog/2012/11/30/casperjs-automation/
 https://github.com/egh/ledger-autosync
 
 
+https://seeker89.github.io/cozy-pfm/ - looks promising. Dead?
+

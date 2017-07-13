@@ -47,6 +47,9 @@ class attr(object):
         ...
         pyggybank.core.InvalidProviderConfig: Duplicate config item for "foo"...
 
+        >>> f.from_config({'a': 1, 'foo': 2, 'f': 2})
+        2
+
         >>> f.from_config({'a': 1})
         Traceback (most recent call last):
         ...
@@ -115,42 +118,104 @@ class Schema:
             )
         return sanitised
 
+    def extract_credentials(self, config):
+        """
+        Take the credentials out of the given sanitised config.
+
+        """
+        new_config = {}
+        credentials = {}
+        for provider_attr in self.provider_attrs:
+            if not isinstance(provider_attr, attr):
+                provider_attr = attr(provider_attr)
+            if not getattr(provider_attr, 'are_credentials', True):
+                continue
+            item = config.get(provider_attr.name, None)
+            if item is not None:
+                credentials[provider_attr.name] = item
+                for name in provider_attr.aliases:
+                    credentials[name] = item
+
+        credentials = Credentials(credentials)
+        return new_config, credentials
+
 
 class Credentials(dict):
-    def __init__(self, *args, **kwargs):
-        dict.__init__(self, *args, **kwargs)
-
     def __getattr__(self, item):
         if item in self:
-            return item[self]
+            return self[item]
         else:
             raise AttributeError('{} has not attribute {}'
                                  ''.format(self.__class__.__name__, item))
 
 
+class ClassPropertyDescriptor:
+
+    def __init__(self, fget, fset=None):
+        self.fget = fget
+        self.fset = fset
+
+    def __get__(self, obj, klass=None):
+        if klass is None:
+            klass = type(obj)
+        return self.fget.__get__(obj, klass)()
+
+    def __set__(self, obj, value):
+        if not self.fset:
+            raise AttributeError("can't set attribute")
+        type_ = type(obj)
+        return self.fset.__get__(obj, type_)(value)
+
+    def setter(self, func):
+        if not isinstance(func, (classmethod, staticmethod)):
+            func = classmethod(func)
+        self.fset = func
+        return self
+
+
+def classproperty(func):
+    if not isinstance(func, (classmethod, staticmethod)):
+        func = classmethod(func)
+
+    return ClassPropertyDescriptor(func)
+
+
 class Provider:
-    attributes = []
+    _attributes = []
+
+
     names = []
     domain = ''
 
-    @classmethod
-    def validate_config(cls, config):
-        if not hasattr(config, 'keys'):
-            raise InvalidProviderConfig("Config isn't dict-like.")
+    @classproperty
+    def attributes(cls):
+        attrs = []
+        for attribute in self._attributes:
+            if not isinstance(attribute, attr):
+                attribute = attr(attribute)
+            attrs.append(attribute)
+        return attrs
 
-        keys = set(config.keys())
-        cls_attrs = set(cls.attributes) | set(['provider'])
-        if config.get('provider') not in cls.names:
-            raise InvalidProviderConfig('The {} class does not provide {}'.format(config.get('provider')))
-
-        missing = ', '.join(cls_attrs - keys)
-        if missing:
-            raise InvalidProviderConfig('Config items missing: {}'.format(missing))
-        not_allowed = ', '.join(keys - cls_attrs)
-        if not_allowed:
-            raise InvalidProviderConfig('The following config items '
-                                        'are not allowed: {}'.format(not_allowed))
-        return True
+    # @classmethod
+    # def validate_config(cls, config):
+    #     if not hasattr(config, 'keys'):
+    #         raise InvalidProviderConfig("Config isn't dict-like.")
+    #
+    #     keys = set(config.keys())
+    #     cls_attrs = set(cls.attributes) | set(['provider'])
+    #     if config.get('provider') not in cls.names:
+    #         raise InvalidProviderConfig(
+    #             'The "{}" class does not provide "{}"'
+    #             ''.format(cls.__name__, config.get('provider')))
+    #
+    #     missing = ', '.join(cls_attrs - keys)
+    #     if missing:
+    #         raise InvalidProviderConfig('Config items missing: {}'.format(missing))
+    #     not_allowed = ', '.join(keys - cls_attrs)
+    #     if not_allowed:
+    #         raise InvalidProviderConfig('The following config items '
+    #                                     'are not allowed: {}'.format(not_allowed))
+    #     return True
 
     @classmethod
     def schema(cls):
@@ -177,16 +242,30 @@ class Provider:
         return providers
 
     @classmethod
-    def from_config(cls, config):
-        """Given an account config, return a provider instance."""
+    def pick_provider(cls, config):
         providers = cls.providers()
         provider_name = config.get('provider', None)
         if provider_name is None:
-            raise ValueError('')
+            raise ValueError('The provider was not defined in the account '
+                             'config')
         provider = providers.get(provider_name, None)
         if provider is None:
-            raise ValueError('')
-        return provider.init_from_config(config)
+            raise ValueError(
+                'No provider found for "{}"'.format(provider_name))
+        return provider
+
+    @classmethod
+    def from_config(cls, config):
+        """
+        Given an account config, return a provider instance and
+        the Credentials.
+
+        """
+        provider = cls.pick_provider(config)
+        schema = provider.schema()
+        config = schema.sanitise(config)
+        config, credentials = schema.extract_credentials(config)
+        return provider.init_from_config(config), credentials
 
     @classmethod
     def init_from_config(cls, config):

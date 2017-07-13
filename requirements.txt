@@ -1,4 +1,9 @@
 splinter==0.7.5
+
+#zope.testbrowser
+#mechanize
+#cssselect
+
 babel==2.4.0
 pyyaml
 prompt_toolkit

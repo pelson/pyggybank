@@ -47,9 +47,20 @@ class RepeatedOptionWithDefault(argparse.Action):
         setattr(namespace, self.dest, dest)
 
 
-def accounts_cat(accounts_file):
+def accounts_cat(infile, accounts_file):
     from . import wizard as wizard_mod
-    sys.exit(wizard_mod.cat_account(accounts_file))
+
+    if infile is None or infile.isatty():
+        # pyggybank accounts > foo.txt
+        # pyggybank accounts
+
+        infile = infile or sys.stdout
+        sys.exit(wizard_mod.cat_account(infile, accounts_file=accounts_file))
+    else:
+        # pyggybank accounts < foo.txt
+        content = infile.read()
+        sys.exit(wizard_mod.write_account(content, accounts_file=accounts_file))
+
 
 def main():
     parser = argparse.ArgumentParser(description='Get information from your internet banks')
@@ -60,6 +71,10 @@ def main():
     wizard_parser = top_subparser.add_parser('wizard')
     wizard_parser.set_defaults(func=wizard)
     accounts_parser = top_subparser.add_parser('accounts')
+    import sys
+    accounts_parser.add_argument('infile', nargs='?', type=argparse.FileType('r'),
+                                 default=sys.stdin if not sys.stdin.isatty() else None)
+
     accounts_parser.set_defaults(func=accounts_cat)
 
     # TODO: Should this just be controled by config, and not a CLI arg...?
@@ -104,20 +119,21 @@ def balance(accounts_files):
     from . import gpgconfig
     from pathlib import Path
     import splinter
-    browser = splinter.Browser()
-    for accounts_file in accounts_files:
-        accounts_file = Path(accounts_file)
-        if not accounts_file.exists():
-            raise ValueError("The accounts file doesn't exist. Perhaps you "
-                             "want to run the wizard?")
-        config = gpgconfig.decrypt_config(accounts_file)
-        for account in config.get('accounts', []):
-            provider = core.Provider.from_config(account)
-            credentials = provider.prepare_credentials(account)
-            provider.authenticate(browser, credentials)
-
-        print(config)
-
+    browser = splinter.Browser(config.CONFIG.get('browser', 'chrome'))
+    try:
+        for accounts_file in accounts_files:
+            accounts_file = Path(accounts_file)
+            if not accounts_file.exists():
+                raise ValueError("The accounts file doesn't exist. Perhaps you "
+                                 "want to run the wizard?")
+            accounts_config = gpgconfig.decrypt_config(accounts_file)
+            for account in accounts_config.get('accounts', []):
+                provider, credentials = core.Provider.from_config(account)
+                provider.authenticate(browser, credentials)
+                # for account_balance in provider.balances():
+                #     print(account_balance.name, account_balance.total)
+    finally:
+        browser.quit()
 
 def wizard(*args, **kwargs):
     from . import wizard as wizard_mod

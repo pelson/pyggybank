@@ -7,6 +7,7 @@ from pathlib import Path
 import ruamel.yaml as yaml
 
 from .config import CONFIG_DIR
+from . import core
 
 
 DEFAULT_ACCOUNTS_FILE = CONFIG_DIR / 'accounts.secure.yml'
@@ -23,6 +24,22 @@ def load_provider_config(path):
 
 
     with open(path, 'r') as fh:
-        providers = yaml.safe_load(fh)
+        return load_provider_config_from_buffer(fh)
 
-    return providers 
+
+def load_provider_config_from_buffer(content):
+    providers = yaml.safe_load(content)
+    if not isinstance(providers, dict):
+        raise TypeError('The config content should contain a dictionary at the '
+                        'top level, got {}.'.format(type(providers)))
+    if 'accounts' not in providers:
+        raise ValueError('The accounts list was not defined in the config.')
+    if not isinstance(providers['accounts'], list):
+        raise ValueError('"accounts" config item should be a list of '
+                         'provider dictionaries')
+
+    for account in providers['accounts']:
+        provider = core.Provider.pick_provider(account)
+        provider.schema().sanitise(account)
+
+    return providers

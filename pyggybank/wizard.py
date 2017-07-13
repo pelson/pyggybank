@@ -48,7 +48,7 @@ style = style_from_dict({
 def configure_provider():
     def get_bottom_toolbar_tokens(cli):
         return [(Token.Toolbar, ' Provider not in the list? Check out https://github.com/pelson/pyggybank.')]
-    
+
     history = InMemoryHistory()
     [history.append(provider) for provider in providers]
 
@@ -69,23 +69,29 @@ def configure_provider():
     cls = providers[provider]
     config = {'provider': provider}
     for attr in cls.attributes:
-        attr_val = prompt('{}: '.format(attr), is_password=True)
-        config[attr] = attr_val
-    cls.validate_config(config)
-    
+        attr_val = prompt('{}: '.format(attr.name), is_password=True)
+        config[attr.name] = attr_val
+    config = cls.schema().sanitise(config)
     return config
 
 
 from contextlib import contextmanager
 
-
-def cat_account(accounts_file=config.DEFAULT_ACCOUNTS_FILE):
+import sys
+def cat_account(outfile=sys.stdout, accounts_file=config.DEFAULT_ACCOUNTS_FILE):
     accounts_file = Path(accounts_file)
     if not accounts_file.exists():
         print("Accounts file doesn't exist.")
     else:
-        config = gpgconfig.decrypt_config(accounts_file)
-        print(yaml.dump(config, indent=1, default_flow_style=False))
+        content = str(gpgconfig.decrypt_file(accounts_file))
+        outfile.write(content)
+from . import pygs
+def write_account(content, accounts_file=config.DEFAULT_ACCOUNTS_FILE):
+    config = pygs.load_provider_config_from_buffer(content)
+    gpgconfig.write_encrypted_config(accounts_file, config)
+
+
+
 from pathlib import Path
 
 @contextmanager
@@ -101,7 +107,7 @@ def _ctx_add_account(acc_file=config.DEFAULT_ACCOUNTS_FILE):
     else:
         # First, let's read from the file to ensure we have access to decrypt it.
         # If we can, we will have the ability to write it back.
-        config = gpgconfig.decrypt_config(acc_file)    
+        config = gpgconfig.decrypt_config(acc_file)
 
     # TODO: Add a test. This *IS* needed.
     config_orig = copy.deepcopy(config.copy)
@@ -110,10 +116,9 @@ def _ctx_add_account(acc_file=config.DEFAULT_ACCOUNTS_FILE):
     # ultimately saving the (potentially) modified config.
     yield config
 
-    print('orig', config_orig == config)
     if config_orig != config:
         gpgconfig.write_encrypted_config(acc_file, config)
-    
+
         tokens = [(Token.Bold, 'Wrote config to: '), (Token.Regular, '{}\n'.format(acc_file))]
         print_tokens(tokens, style=style)
 
