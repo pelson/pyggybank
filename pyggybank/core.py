@@ -190,7 +190,7 @@ class Provider:
     @classproperty
     def attributes(cls):
         attrs = []
-        for attribute in self._attributes:
+        for attribute in cls._attributes:
             if not isinstance(attribute, attr):
                 attribute = attr(attribute)
             attrs.append(attribute)

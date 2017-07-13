@@ -143,7 +143,8 @@ def balance(accounts_files):
             accounts_config = gpgconfig.decrypt_config(accounts_file)
             for account in accounts_config.get('accounts', []):
                 provider, credentials = core.Provider.from_config(account)
-                provider.authenticate(browser, credentials)
+                for _ in provider.authenticate(browser, credentials):
+                    pass
 
                 # for account_balance in provider.balances():
                 #     print(account_balance.name, account_balance.total)
@@ -165,6 +166,7 @@ def visit(accounts_files):
 
     try:
         account_tabs = []
+        window = None
         for accounts_file in accounts_files:
             accounts_file = Path(accounts_file)
             if not accounts_file.exists():
@@ -173,7 +175,9 @@ def visit(accounts_files):
             accounts_config = gpgconfig.decrypt_config(accounts_file)
             for account in accounts_config.get('accounts', []):
                 provider, credentials = core.Provider.from_config(account)
-                browser.execute_script('''window.open("about:blank", "_blank");''')
+                # If not the first time around the loop, open a new tab/window.
+                if window is not None:
+                    browser.execute_script('''window.open("about:blank", "_blank");''')
                 window = browser.windows[-1]
                 window.is_current = True
                 steps = provider.authenticate(browser, credentials)
@@ -184,6 +188,8 @@ def visit(accounts_files):
             for window_and_steps in account_tabs[:]:
                 window, steps = window_and_steps
                 window.is_current = True
+                import time
+                time.sleep(0.1)
                 try:
                     next(steps)
                 except StopIteration:
