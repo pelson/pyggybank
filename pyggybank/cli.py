@@ -1,6 +1,8 @@
 import argparse
 import sys
 
+import prompt_toolkit
+
 from . import pygs
 from . import config
 from . import core
@@ -68,6 +70,10 @@ def main():
     top_subparser = parser.add_subparsers()
     sp = top_subparser.add_parser('balance')
     sp.set_defaults(func=balance)
+
+    visit_parser = top_subparser.add_parser('visit')
+    visit_parser.set_defaults(func=visit)
+
     wizard_parser = top_subparser.add_parser('wizard')
     wizard_parser.set_defaults(func=wizard)
     accounts_parser = top_subparser.add_parser('accounts')
@@ -103,6 +109,14 @@ def main():
             help=('The accounts file to use (default: {})'
                   ''.format(pygs.DEFAULT_ACCOUNTS_FILE)))
 
+    visit_parser.add_argument(
+            '--accounts',
+            action=RepeatedOptionWithDefault,
+            default=[pygs.DEFAULT_ACCOUNTS_FILE],
+            dest='accounts_files',
+            help=('The accounts file to use (default: {})'
+                  ''.format(pygs.DEFAULT_ACCOUNTS_FILE)))
+
     # Use the extension defined above.
     parser.set_default_subparser('balance')
     parsed_args = vars(parser.parse_args())
@@ -130,6 +144,7 @@ def balance(accounts_files):
             for account in accounts_config.get('accounts', []):
                 provider, credentials = core.Provider.from_config(account)
                 provider.authenticate(browser, credentials)
+
                 # for account_balance in provider.balances():
                 #     print(account_balance.name, account_balance.total)
     finally:
@@ -138,6 +153,48 @@ def balance(accounts_files):
 def wizard(*args, **kwargs):
     from . import wizard as wizard_mod
     sys.exit(wizard_mod.wizard(*args, **kwargs))
+
+
+
+def visit(accounts_files):
+    # Q: Do we really need to support multiple configs at the same time?
+    from . import gpgconfig
+    from pathlib import Path
+    import splinter
+    browser = splinter.Browser(config.CONFIG.get('browser', 'chrome'))
+
+    try:
+        account_tabs = []
+        for accounts_file in accounts_files:
+            accounts_file = Path(accounts_file)
+            if not accounts_file.exists():
+                raise ValueError("The accounts file doesn't exist. Perhaps you "
+                                 "want to run the wizard?")
+            accounts_config = gpgconfig.decrypt_config(accounts_file)
+            for account in accounts_config.get('accounts', []):
+                provider, credentials = core.Provider.from_config(account)
+                browser.execute_script('''window.open("about:blank", "_blank");''')
+                window = browser.windows[-1]
+                window.is_current = True
+                steps = provider.authenticate(browser, credentials)
+                account_tabs.append([window, steps])
+                # for account_balance in provider.balances():
+                #     print(account_balance.name, account_balance.total)
+        while account_tabs:
+            for window_and_steps in account_tabs[:]:
+                window, steps = window_and_steps
+                window.is_current = True
+                try:
+                    next(steps)
+                except StopIteration:
+                    account_tabs.remove(window_and_steps)
+
+        while prompt_toolkit.prompt('Ready to close the browser? ').lower() in ['no', 'n']:
+            pass
+    finally:
+        browser.quit()
+
+
 
 
 if __name__ == '__main__':
