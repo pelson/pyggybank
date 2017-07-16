@@ -5,5 +5,5 @@ splinter==0.7.5
 #cssselect
 
 babel==2.4.0
-pyyaml
-prompt_toolkit
+pyyaml==3.12
+prompt-toolkit==1.0.14
