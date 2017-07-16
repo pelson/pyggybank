@@ -39,6 +39,6 @@ script:
   #- python testing/test_wizard.py
 
   - if [[ "$PURE_TESTS" == 1 ]]; then
-        pytest --cov-report=;
+        pytest --cov=pyggybank;
         coveralls;
     fi
