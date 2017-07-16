@@ -1,10 +1,15 @@
 pyggybank has the ability to:
 
  * Login to internet banking in a semi-automated way
-    * store credentials in a secure manner
+    * save your credentials encrypted, and only have the ability to decrypt them when you wish (using PGP)
+    * download balances and transactions
  * Handle multiple currencies and format localisation
  * Cache results to speed up subsequent retrievals (TODO)
  * Output the results into standard formats for subsequent analysis (TODO)
+ * Take a simplistic view of accounts, where +$$$ is money in your pocket, and -$$$ is money out of your pocket
+ * Provide a summary (one per currency) of your balance (TODO)
+   * Ability to see the summary at any point in time (where records exist) and therefore see the trend of your finances + how much you're spending
+ * Provide an API for 3rd party tools to extend the possible analyses and add pretty interfaces to your data (TODO)
 
 
 pyggybank does not strive to:
