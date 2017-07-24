@@ -1,0 +1,99 @@
+<html>
+<head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/css/bootstrap.min.css"
+   integrity="sha384-rwoIResjU2yc3z8GV/NPeZWAv56rSmLldC3R/AZzGRnGxQQKnKkoFVhFQhNUwEyJ" crossorigin="anonymous">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body class="container">
+<script>
+page_name = 'start'
+
+function onready() {
+
+  // // Set the action of the let's go button.
+  // $('#foo').attr('action', next_page())
+
+  pgs = total_n_pages();
+  if (pgs > 0) {
+
+    for (var i = 1; i <= pgs; i++) {
+      add_page();
+      conf = page_config(i);
+      $('select#form' + i + '_pagename').val(conf['page']).change();
+
+      inputs = $(':input[form="form' + i + '"]')
+      inputs.each(function(j, item){
+        item = $(item);
+        key = item.attr('placeholder');
+        item.val(conf[key]);
+      });
+    }
+  } else {
+    default_config();
+  }
+}
+
+function default_config(){
+  // A basic default.
+  add_page();
+  //add_page();
+  //$('select#form2_pagename').val(Object.keys(components)[1]).change();
+}
+
+function clear_session(){
+  sessionStorage.clear();
+  $('#parameters').empty();
+  n_pages = 0;
+  default_config();
+}
+
+</script>
+
+<div class="contents">
+  You can configure a testing provider with the following properties:
+
+
+  <div id="parameters">
+  </div>
+  <a class="btn btn-primary" href="javascript:add_page();" role="button">+</a>
+
+  <div id="balance-config">
+    Which type of balance view?:
+    <label class="custom-control custom-radio">
+      <input id="balance1" name="balance" type="radio" class="custom-control-input" checked="checked" value="balances_1">
+      <span class="custom-control-indicator"></span>
+      <span class="custom-control-description">Basic balance</span>
+    </label>
+  </div>
+
+  <div id="accounts-config">
+    Which type of account view?:
+    <label class="custom-control custom-radio">
+      <input id="accounts1" name="accounts" type="radio" class="custom-control-input" checked="checked" value="accounts_1">
+      <span class="custom-control-indicator"></span>
+      <span class="custom-control-description">Basic accounts</span>
+    </label>
+  </div>
+
+  <hr/>
+
+  <br>
+  <a href="javascript:store_session();">Console</a>
+<br/>
+
+  <form action="" method="get" id="main" onsubmit="javascript: return store_session();">
+    <input id="page_n" type="hidden" name="page_n" value="0">
+    <input class="btn btn-primary" type="submit" value="Let's go">
+  <a class="btn btn-primary" href="javascript: clear_session();" role="button">Reset</a>
+  </form>
+<div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"
+ integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+ <script src="driver.js"></script>
+<script>
+$( document ).ready(onready);
+</script
+</body>
+</html>
