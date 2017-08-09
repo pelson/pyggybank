@@ -10,8 +10,14 @@ page_name = 'start'
 
 function onready() {
 
-  // // Set the action of the let's go button.
-  // $('#foo').attr('action', next_page())
+  params = getUrlVars();
+  if ('configJSON' in params) {
+    clear_session();
+    params = getUrlVars();
+    provider_config = JSON.parse(decodeURIComponent(params['configJSON']));
+    // Save data to sessionStorage
+    sessionStorage.setItem('provider_config', JSON.stringify(provider_config));
+  }
 
   pgs = total_n_pages();
   if (pgs > 0) {
@@ -44,7 +50,6 @@ function clear_session(){
   sessionStorage.clear();
   $('#parameters').empty();
   n_pages = 0;
-  default_config();
 }
 
 </script>
@@ -84,13 +89,16 @@ function clear_session(){
   <form action="" method="get" id="main" onsubmit="javascript: return store_session();">
     <input id="page_n" type="hidden" name="page_n" value="0">
     <input class="btn btn-primary" type="submit" value="Let's go">
-  <a class="btn btn-primary" href="javascript: clear_session();" role="button">Reset</a>
+  <a class="btn btn-primary" href="javascript: clear_session(); default_config();" role="button">Reset</a>
   </form>
 <div>
 
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.2.1/jquery.min.js"
  integrity="sha256-hwg4gsxgFZhOsEEamdOYGBf13FyQuiTwlAQgxVSNgt4=" crossorigin="anonymous"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tether/1.4.0/js/tether.min.js"
+ integrity="sha256-gL1ibrbVcRIHKlCO5OXOPC/lZz/gpdApgQAzskqqXp8=" crossorigin="anonymous"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0-alpha.6/js/bootstrap.min.js"
+ integrity="sha384-vBWWzlZJ8ea9aCX4pEW3rVHjgjt7zpkNpZk+02D9phzyeVkE+jo0ieGizqPLForn" crossorigin="anonymous"></script>
  <script src="driver.js"></script>
 <script>
 $( document ).ready(onready);

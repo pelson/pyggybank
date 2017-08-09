@@ -93,10 +93,8 @@ function select_changed(event) {
   page_html(page, page_num, params);
 }
 
-function log_forms(){
-  console.log('bal]', $('.balance').val());
+function config_options(){
   f = $('input[name=balance]:checked');
-  console.log(f, f.val());
   auth_config = [];
   provider_configuration = {accounts: {'page': $('input[name=accounts]:checked').val()},
                             balance: {'page': $('input[name=balance]:checked').val()},
@@ -115,7 +113,16 @@ function log_forms(){
     });
 
   }
-  console.log(provider_configuration);
+  return provider_configuration
+}
+
+function config_url(){
+    provider_configuration = session_config();
+    return 'start.html?configJSON=' + encodeURIComponent(JSON.stringify(provider_configuration));
+}
+
+function log_forms(){
+  provider_configuration = config_options()
   // Save data to sessionStorage
   sessionStorage.setItem('provider_config', JSON.stringify(provider_configuration));
 }
@@ -150,10 +157,8 @@ function page_n() {
     } else {
       // TODO: Make this the index page?
       //$(location).attr('href', 'start.html')
-      console.log('whaat?')
     }
   }
-  console.log('current', parseInt(page_n_v));
   return parseInt(page_n_v)
 }
 
@@ -165,7 +170,6 @@ function next_page_n() {
 
 function next_page(){
   i = next_page_n()
-  console.log('current next', i, total_n_pages())
   if (i - 1 == total_n_pages()) {
     conf = session_config()
     next = conf['balance']['page'] + '.html'
@@ -268,15 +272,19 @@ function global_onready() {
   if (!sessionStorage.getItem('provider_config')) {
     footer = 'not set'
   } else {
+    // TODO: Use the utility to get this value.
     config = JSON.stringify(JSON.parse(sessionStorage.getItem('provider_config')), null, 2);
+
     footer = `
     <!-- Button trigger modal -->
-    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#exampleModal">
+    <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#configJSON">
       set
     </button>
 
+    <a href="` + config_url() + `">Config URL</a>
+
     <!-- Modal -->
-    <div class="modal fade" id="exampleModal" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal fade" id="configJSON" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
       <div class="modal-dialog" role="document">
         <div class="modal-content">
           <div class="modal-header">
@@ -299,8 +307,7 @@ function global_onready() {
 
   $('<footer/>', {id: 'footer', 'class': 'footer bd-footer'}).appendTo(body)
     .html('Config: ' + footer);
-  $('#config-json').get(0).innerHtml = syntaxHighlight(config);
-  console.log($('pre#config-json').get(0).innerHtml);
 }
 
+// TODO: I question if this is *really* desirable.
 $( document ).ready(global_onready);
