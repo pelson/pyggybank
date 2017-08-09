@@ -10,6 +10,7 @@ pyggybank has the ability to:
  * Provide a summary (one per currency) of your balance (TODO)
    * Ability to see the summary at any point in time (where records exist) and therefore see the trend of your finances + how much you're spending
  * Provide an API for 3rd party tools to extend the possible analyses and add pretty interfaces to your data (TODO)
+ * Access past transatctions, but not create new ones
 
 
 pyggybank does not strive to:
@@ -17,6 +18,6 @@ pyggybank does not strive to:
  * Provide a rich internet banking-like web-interface
  * Interpret the data (e.g. forecasts)
  * Set up transfers, payments, direct debits or any other non read-only activity
- * Access transatction - it gets account balances only
  * Support legacy python. Python 3.6+
  * Automate sections where human-in-the-loop is required (e.g. robot detection, bespoke one-time pass code implementations)
+ * Hide error messages. You will see full tracebacks when they occur 

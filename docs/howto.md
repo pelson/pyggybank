@@ -10,3 +10,7 @@ Making the necessary changes, and then piping these back in with:
 
     pyggybank accounts < decrypted_accounts.DELME.yml
 
+
+### Add a new provider
+
+TODO
