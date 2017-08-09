@@ -1,8 +1,12 @@
+
+
 # pyggybank
 
 [![Coverage Status](https://coveralls.io/repos/github/pelson/pyggybank/badge.svg?branch=master)](https://coveralls.io/github/pelson/pyggybank?branch=master)
 
 badges
+
+NOTE: This package is currently a work in progress. It is not currently fit for everyday use.
 
 PLEASE NOTE: Currently it is necessary to have a recent version of gnupg (>=2.1) to be able to encrypt and decrypt accounts configs.
 At some point, I will add an option to disable encryption for those on older gnupg versions.
