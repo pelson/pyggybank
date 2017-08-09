@@ -2,8 +2,19 @@ import json
 import urllib.parse
 import uuid
 
+import pytest
+
 from ... import core
 from ... import exceptions
+from ... import parse
+
+
+def provider_url(config):
+    qs = urllib.parse.urlencode(
+            {'configJSON': json.dumps(config, separators=(',', ':'))},
+            quote_via=urllib.parse.quote)
+    return ('https://rawgit.com/pelson/pyggybank/master/pyggybank/tests/'
+            'test_provider/start.html?{}'.format(qs))
 
 
 class TestProvider(core.Provider):
@@ -22,8 +33,7 @@ class TestProvider(core.Provider):
                 }
               ]
             }
-    domain = ('https://rawgit.com/pelson/pyggybank/master/pyggybank/tests/test_provider/'
-              'start.html?{}'.format(urllib.parse.urlencode({'configJSON': json.dumps(config, separators=(',', ':'))}, quote_via=urllib.parse.quote)))
+    domain = provider_url(config)
 
     def authenticate(self, browser, credentials):
         self.log.info('Visiting {}'.format(self.domain))
@@ -43,8 +53,19 @@ class TestProvider(core.Provider):
         if button:
             raise exceptions.AuthenticationError()
 
+    def balances(self, browser):
+        self.log.info('Navigating to balances screen')
+        balances = []
+        accounts = list(browser.find_by_xpath("//tr"))[1:]
+        for account in accounts:
+            print(account.find_by_xpath('td'))
+            id, name, acc_type, bal = [td.text for td in account.find_by_xpath('td')]
+            bal = parse.parse_currency(bal, 'GBP')
+            bal = {'id': id, 'name': name, 'amount': bal.float, 'currency': 'GBP', }
+            balances.append(bal)
+        return balances
 
-import pytest
+
 @pytest.fixture(scope="module")
 def browser():
     from splinter import Browser
@@ -78,15 +99,19 @@ def test_basic_auth(browser):
     assert browser.is_text_present('This page is the simplest of balances in table form')
 
 
+@pytest.mark.BROWSER
 def test_invalid_auth(browser):
     with pytest.raises(exceptions.AuthenticationError):
         p = auth_provider(browser, {'password': 'Not correct'})
 
 
-
+@pytest.mark.BROWSER
 def test_balances(browser):
     config = {'password': 'Basic password'}
     p = auth_provider(browser, config)
     bal = p.balances(browser)
-    assert bal == {12}
+    expected = [{'amount': -124.86, 'currency': 'GBP', 'id': '1', 'name': 'My first account'},
+                {'amount': -198765.43, 'currency': 'GBP', 'id': '2', 'name': 'My mortgage'},
+                {'amount': 1234.56, 'currency': 'GBP', 'id': '3', 'name': 'My first saver'}]
+    assert bal == expected
 
