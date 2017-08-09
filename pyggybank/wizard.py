@@ -19,6 +19,7 @@ import ruamel.yaml as yaml
 from . import core
 from . import config
 
+# TODO: This needs to be removed in favour of core.Providers.providers()
 providers = {}
 for cls in core.Provider.__subclasses__():
     for name in cls.names:

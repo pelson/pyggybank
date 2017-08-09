@@ -1,3 +1,13 @@
+"""
+These integration tests exist solely to test the interaction between pyggybank and GPG on the CLI.
+All attempts should be made to avoid extending these tests in preference for unit tests of the functions
+themselves (where necessary, mocking out the GPG interactions).
+
+TODO: It would be great to bring these tests into the pyggybank.test module, and marking them as
+full-blown integration tests.
+
+"""
+
 import pexpect
 import sys
 import os

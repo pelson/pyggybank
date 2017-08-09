@@ -34,6 +34,7 @@ script:
       python splinter_test.py;
     fi
 
+  # Currently disabled because we have an unsupportable version of GPG (or need to extend pyggybank to deal with gpg<2.12:
   #- which gnupg
   #- pip install pexpect
   #- python testing/test_wizard.py
