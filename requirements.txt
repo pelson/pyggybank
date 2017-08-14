@@ -1,4 +1,4 @@
-splinter==0.7.5
+splinter==0.7.6
 
 #zope.testbrowser
 #mechanize
@@ -6,4 +6,4 @@ splinter==0.7.5
 
 babel==2.4.0
 pyyaml==3.12
-prompt-toolkit==1.0.14
+prompt-toolkit==1.0.15
