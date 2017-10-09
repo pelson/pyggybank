@@ -1,4 +1,4 @@
-splinter==0.7.5
+splinter==0.7.6
 
 #zope.testbrowser
 #mechanize
