@@ -4,6 +4,6 @@ splinter==0.8.0
 #mechanize
 #cssselect
 
-babel==2.5.1
+babel==2.6.0
 pyyaml==3.12
 prompt-toolkit==1.0.15
